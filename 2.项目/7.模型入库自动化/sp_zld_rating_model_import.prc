@@ -58,7 +58,7 @@ BEGIN
            END AS error_msg,
            v_creation_time
       FROM zld_rating_model_sub_model
-     GROUP BY parent_rm_name, NAME
+     GROUP BY parent_rm_name , NAME
     HAVING COUNT(*) > 1;
 
   --敞口对应多模型问题
@@ -79,7 +79,8 @@ BEGIN
   --校准参数重复问题
   INSERT INTO zld_rating_model_errorlog
     (task_name, error_type, model_name, error_msg, create_time)
-    SELECT v_task_name,
+    SELECT DISTINCT
+           v_task_name,
            '数据重复',
            d.rm_name,
            CASE
@@ -89,13 +90,14 @@ BEGIN
            END AS error_msg,
            v_creation_time
       FROM zld_rating_calc_pd_ref d
-     GROUP BY d.rm_name, d.formular
+     GROUP BY d.rm_name,d.formular
     HAVING COUNT(*) > 1;
 
   --模型指标重复问题
   INSERT INTO zld_rating_model_errorlog
     (task_name, error_type, model_name, error_msg, create_time)
-    SELECT v_task_name,
+    SELECT DISTINCT 
+           v_task_name,
            '数据重复',
            model_name,
            CASE
@@ -105,7 +107,7 @@ BEGIN
            END AS error_msg,
            v_creation_time
       FROM zld_rating_model_factor
-     GROUP BY model_name, sub_model_name, ft_code
+     GROUP BY model_name,sub_model_name,ft_code
     HAVING COUNT(*) > 1;
 
   --数据缺失问题
@@ -152,6 +154,20 @@ BEGIN
                      GROUP BY a.model_name) mid)
      WHERE error_msg IS NOT NULL;
 
+  INSERT INTO zld_rating_model_errorlog
+    (task_name, error_type, model_name, error_msg, create_time)
+    SELECT v_task_name, '数据缺失', model_name, error_msg, v_creation_time
+      FROM (SELECT DISTINCT e.model_name,
+                            CASE
+                              WHEN c.name IS NULL THEN
+                               '指标定义页中,模型:' || e.model_name || '  子模型:' || e.sub_model_name ||
+                               '不存在于子模型页中'
+                            END AS error_msg
+              FROM zld_rating_model_factor e
+              LEFT JOIN zld_rating_model_sub_model c
+                ON (c.parent_rm_name = e.model_name AND c.name = e.sub_model_name))
+     WHERE error_msg IS NOT NULL;
+
   COMMIT;
 
   SELECT COUNT(*)
@@ -192,16 +208,15 @@ BEGIN
                                      AND rm.name = i.model_name);
       --根据模型删除对应子模型
       DELETE FROM rating_model_sub_model rms
-       WHERE rms.parent_rm_id =
+       WHERE rms.parent_rm_id IN
              (SELECT rm.id FROM rating_model rm WHERE rm.name = i.model_name);
     
       --根据模型删除对应主标尺
       DELETE FROM rating_calc_pd_ref rpf
-       WHERE rpf.rm_id = (SELECT id FROM rating_model WHERE NAME = i.model_name);
+       WHERE rpf.rm_id IN (SELECT id FROM rating_model WHERE NAME = i.model_name);
     
       --根据敞口删除对应敞口模型映射
-      DELETE FROM rating_model_exposure_xw xw
-       WHERE xw.exposure_sid = i.exposure_sid;
+      DELETE FROM rating_model_exposure_xw xw WHERE xw.exposure_sid = i.exposure_sid;
     
       --根据模型删除对应模型表
       DELETE FROM rating_model rm WHERE rm.name = i.model_name;
@@ -280,7 +295,7 @@ BEGIN
                a.mean_value,
                a.sd_value,
                v_creation_time,
-               a.priority
+               1 AS priority
           FROM zld_rating_model_sub_model a
           JOIN rating_model b
             ON (a.parent_rm_name = b.name AND b.name = i.model_name);
@@ -359,11 +374,14 @@ BEGIN
   END IF;
 
   COMMIT;
-
+  
+  v_task_name := 'ov_error';
+  
   OPEN ov_error_msg FOR
     SELECT t.error_type, t.error_msg
       FROM zld_rating_model_errorlog t
-     WHERE t.create_time >= iv_date;
+     WHERE t.create_time >= iv_date
+      AND rownum <= 1;
 
   --报错处理
 EXCEPTION
