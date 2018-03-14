@@ -1,0 +1,155 @@
+SELECT zs.exposure_nm,
+       zs.company_id,
+       zs.company_nm,
+       to_char(a.rpt_dt, 'yyyymmdd') AS rpt_dt,
+       operate_reve_last_y,
+       operate_reve_bf_last_y,
+       operate_reve_bf_last_y,
+       (operate_reve_last_y - operate_reve_bf_last_y) / operate_reve_bf_last_y AS resul,
+       operate_reve, 
+       operate_exp,
+       NULL,
+       NULL,
+       NULL,
+       accept_inv_rec,
+       account_pay,
+       account_pay_last_y,
+       account_rec,
+       account_rec_last_y,
+       accrue_expense,
+       accrue_expense_last_y,
+       advance_receive,
+       advance_receive_last_y,
+       bill_pay,
+       bill_pay_last_y,
+       bill_rec,
+       bill_rec_last_y,
+       bond_pay,
+       bond_pay_last_y,
+       buygoods_service_pay,
+       capital_reserve,
+       capital_reserve_last_y,
+       construction_progress,
+       construction_progress_last_y,
+       construct_pro_bf_last_y,
+       defer_income,
+       defer_income_oneyear,
+       defer_income_oneyear_last_y,
+       defer_incometax_asset,
+       develop_exp,
+       divi_profitorint_pay,
+       divi_profitorint_pay_last_y,
+       divi_profitorint_pay_bf_last_y,
+       ebit,
+       ebit_last_y,
+       ebit_bf_last_y,
+       ebitda,
+       ebitda_last_y,
+       ebitda_bf_last_y,
+       finance_exp,
+       fixed_asset,
+       fixed_asset_last_y,
+       fvalue_fasset,
+       fvalue_income,
+       good_will,
+       income_tax,
+       intangible_asset,
+       interest_pay,
+       inventory,
+       inventory_last_y,
+       invest_income,
+       lt_account_pay,
+       lt_account_pay_last_y,
+       lt_borrow,
+       lt_borrow_last_y,
+       ltdefer_asset,
+       manage_exp,
+       monetary_fund,
+       net_inv_cashflow,
+       net_operate_cashflow,
+       net_operate_cashflow_last_y,
+       net_operate_cashflow_bf_last_y,
+       net_profit,
+       net_profit_last_y,
+       net_profit_bf_last_y,
+       nonl_liab_oneyear,
+       nonl_liab_oneyear_last_y,
+       nonoperate_reve,
+       operate_exp,
+       operate_profit,
+       operate_profit_last_y,
+       operate_profit_bf_last_y,
+       operate_reve,
+       operate_reve_last_y,
+       operate_reve_bf_last_y,
+       other_equity,
+       other_lasset,
+       other_lliab,
+       other_lliab_last_y,
+       other_pay,
+       other_pay_last_y,
+       other_rec,
+       parent_net_profit,
+       parent_net_profit_last_y,
+       parent_net_profit_bf_last_y,
+       salary_pay,
+       salary_pay_last_y,
+       sale_exp,
+       salegoods_service_rec,
+       share_capital,
+       share_capital_last_y,
+       st_borrow,
+       st_borrow_last_y,
+       sum_asset,
+       sum_asset_last_y,
+       sum_asset_bf_last_y,
+       sum_lasset,
+       sum_lasset_last_y,
+       sum_liab,
+       sum_lliab,
+       sum_lliab_last_y,
+       sum_nonl_asset,
+       sum_nonl_asset_last_y,
+       sum_nonl_liab,
+       sum_parent_equity,
+       sum_profit,
+       sum_profit_last_y,
+       sum_profit_bf_last_y,
+       sum_sh_equity,
+       sum_sh_equity_last_y,
+       sum_sh_equity_bf_last_y,
+       tax_pay,
+       tax_pay_last_y,
+       tradef_asset
+  FROM compy_finance a
+  JOIN compy_finance_last_y b
+    ON a.company_id = b.company_id_last_y
+   AND a.rpt_dt = b.rpt_dt_last_y
+   AND a.rpt_timetype_cd = b.rpt_timetype_cd_last_y
+  JOIN compy_finance_bf_last_y c
+    ON a.company_id = c.company_id_bf_last_y
+   AND a.rpt_dt = c.rpt_dt_bf_last_y
+   AND a.rpt_timetype_cd = c.rpt_timetype_cd_bf_last_y
+  JOIN (SELECT a.company_id,
+               a.client_id,
+               c.company_nm,
+               b.exposure AS exposure_nm
+          FROM compy_exposure a
+          JOIN exposure b
+            ON a.exposure_sid = b.exposure_sid
+          JOIN compy_basicinfo c
+            ON a.company_id = c.company_id
+         WHERE a.client_id = 5) zs
+    ON zs.company_id = a.company_id
+   AND zs.client_id = 5
+ WHERE a.rpt_timetype_cd = 1
+   AND a.combine_type_cd = 1
+   AND a.data_ajust_type = 3
+   AND to_char(a.rpt_dt, 'yyyymmdd') BETWEEN '20161231' AND '20161231'
+   AND a.company_id IN
+        (SELECT company_id
+           FROM compy_rating_list
+          WHERE company_id IN ('332132', '428808'));
+
+
+SELECT * FROM compy_element;

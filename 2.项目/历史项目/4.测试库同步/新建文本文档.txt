@@ -1,0 +1,1773 @@
+rem Differences between CS_MASTER_TGT@CMS_DEV and CS_MASTER_TEST@CMS_DEV, created on 2017/12/19
+rem Press Apply button, or run in Command Window or SQL*Plus connected as CS_MASTER_TEST@CMS_DEV
+
+------------------------------------
+--  New table compy_warnings_tmp  --
+------------------------------------
+-- Create table
+create table COMPY_WARNINGS_TMP
+(
+  compy_warnings_sid NUMBER(16),
+  company_id         NUMBER(16),
+  notice_dt          DATE,
+  warning_type       INTEGER,
+  severity           INTEGER,
+  warning_score      INTEGER,
+  warning_title      VARCHAR2(1000),
+  type_id            INTEGER,
+  status_flag        INTEGER,
+  warning_result_cd  INTEGER,
+  adjust_severity    INTEGER,
+  adjust_score       INTEGER,
+  remark             VARCHAR2(2000),
+  process_by         NUMBER(16),
+  process_dt         TIMESTAMP(6),
+  isdel              INTEGER,
+  updt_by            NUMBER(16),
+  src_cd             VARCHAR2(10),
+  updt_dt            TIMESTAMP(6)
+)
+;
+
+---------------------------------------
+--  New table compy_warningtype_cmb  --
+---------------------------------------
+-- Create table
+create table COMPY_WARNINGTYPE_CMB
+(
+  warning_cd      VARCHAR2(10) not null,
+  warning_nm      VARCHAR2(500),
+  warning_type_cd VARCHAR2(10) not null,
+  warning_type    VARCHAR2(10) not null,
+  is_single       INTEGER,
+  is_emergent     INTEGER,
+  score1          INTEGER,
+  valid_flag1     INTEGER,
+  score2          INTEGER,
+  valid_flag2     INTEGER,
+  index_type_cd   VARCHAR2(30),
+  signal_type_cd  VARCHAR2(30),
+  isdel           INTEGER not null,
+  src_cd          VARCHAR2(10) not null,
+  updt_by         NUMBER(16) not null,
+  updt_dt         TIMESTAMP(6) not null
+)
+;
+-- Add comments to the table 
+comment on table COMPY_WARNINGTYPE_CMB
+  is '预警类型';
+-- Add comments to the columns 
+comment on column COMPY_WARNINGTYPE_CMB.warning_cd
+  is '预警类型编码';
+comment on column COMPY_WARNINGTYPE_CMB.warning_nm
+  is '预警类型名称';
+comment on column COMPY_WARNINGTYPE_CMB.warning_type_cd
+  is '信号所属风险类型';
+comment on column COMPY_WARNINGTYPE_CMB.warning_type
+  is '信号所属风险类型名称';
+comment on column COMPY_WARNINGTYPE_CMB.is_single
+  is '组合/单一';
+comment on column COMPY_WARNINGTYPE_CMB.is_emergent
+  is '是否紧急风险';
+comment on column COMPY_WARNINGTYPE_CMB.score1
+  is '分值（大中企业）';
+comment on column COMPY_WARNINGTYPE_CMB.valid_flag1
+  is '标识（大中企业）';
+comment on column COMPY_WARNINGTYPE_CMB.score2
+  is '分值（小企业）';
+comment on column COMPY_WARNINGTYPE_CMB.valid_flag2
+  is '标识（小企业）';
+comment on column COMPY_WARNINGTYPE_CMB.index_type_cd
+  is '指标类型1';
+comment on column COMPY_WARNINGTYPE_CMB.signal_type_cd
+  is '指标类型2';
+comment on column COMPY_WARNINGTYPE_CMB.isdel
+  is '是否删除';
+comment on column COMPY_WARNINGTYPE_CMB.src_cd
+  is '源系统';
+comment on column COMPY_WARNINGTYPE_CMB.updt_by
+  is '更新人';
+comment on column COMPY_WARNINGTYPE_CMB.updt_dt
+  is '更新时间';
+-- Create/Recreate primary, unique and foreign key constraints 
+alter table COMPY_WARNINGTYPE_CMB
+  add constraint PK_COMPY_WARNINGTYPE_CMB primary key (WARNING_CD);
+
+-----------------------------------
+--  New table compy_warning_cmb  --
+-----------------------------------
+-- Create table
+create table COMPY_WARNING_CMB
+(
+  warning_id       NUMBER(16) not null,
+  company_id       NUMBER(16) not null,
+  warning_cd       VARCHAR2(10),
+  warn_title       VARCHAR2(500),
+  warn_content     CLOB,
+  infosrc_dt       TIMESTAMP(6),
+  warnsrc_cd       VARCHAR2(30),
+  warn_outer_src   VARCHAR2(50),
+  attachment       VARCHAR2(2000),
+  status_cd        VARCHAR2(30),
+  filter_status_cd VARCHAR2(30),
+  is_true          NUMBER(24,4),
+  org_id           VARCHAR2(100),
+  org_nm           VARCHAR2(300),
+  lastmodify_dt    TIMESTAMP(6),
+  isdel            INTEGER not null,
+  src_company_cd   VARCHAR2(60),
+  src_cd           VARCHAR2(10) not null,
+  updt_by          NUMBER(16) not null,
+  updt_dt          TIMESTAMP(6) not null
+)
+;
+-- Add comments to the table 
+comment on table COMPY_WARNING_CMB
+  is '预警信号';
+-- Add comments to the columns 
+comment on column COMPY_WARNING_CMB.warning_id
+  is '预警信号标识符';
+comment on column COMPY_WARNING_CMB.company_id
+  is '企业标识符';
+comment on column COMPY_WARNING_CMB.warning_cd
+  is '预警信号编码';
+comment on column COMPY_WARNING_CMB.warn_title
+  is '标题';
+comment on column COMPY_WARNING_CMB.warn_content
+  is '内容';
+comment on column COMPY_WARNING_CMB.infosrc_dt
+  is '信息来源时间';
+comment on column COMPY_WARNING_CMB.warnsrc_cd
+  is '信号来源';
+comment on column COMPY_WARNING_CMB.warn_outer_src
+  is '外部具体来源';
+comment on column COMPY_WARNING_CMB.attachment
+  is '附件';
+comment on column COMPY_WARNING_CMB.status_cd
+  is '信号状态';
+comment on column COMPY_WARNING_CMB.filter_status_cd
+  is '信号过滤状态';
+comment on column COMPY_WARNING_CMB.is_true
+  is '是否对客户有实质影响';
+comment on column COMPY_WARNING_CMB.org_id
+  is '机构ID';
+comment on column COMPY_WARNING_CMB.org_nm
+  is '机构名称';
+comment on column COMPY_WARNING_CMB.lastmodify_dt
+  is '记录更新时间';
+comment on column COMPY_WARNING_CMB.isdel
+  is '是否删除';
+comment on column COMPY_WARNING_CMB.src_company_cd
+  is '源企业代码';
+comment on column COMPY_WARNING_CMB.src_cd
+  is '源系统';
+comment on column COMPY_WARNING_CMB.updt_by
+  is '更新人';
+comment on column COMPY_WARNING_CMB.updt_dt
+  is '更新时间';
+-- Create/Recreate primary, unique and foreign key constraints 
+alter table COMPY_WARNING_CMB
+  add constraint PK_COMPY_WARNING_CMB primary key (WARNING_ID);
+
+----------------------------------------
+--  New table compy_warnlevelchg_cmb  --
+----------------------------------------
+-- Create table
+create table COMPY_WARNLEVELCHG_CMB
+(
+  warnchg_id     INTEGER not null,
+  company_id     NUMBER(16) not null,
+  submit_dt      TIMESTAMP(6),
+  warn_level     VARCHAR2(30),
+  pre_warn_level VARCHAR2(30),
+  operate_module VARCHAR2(30),
+  operate_dt     TIMESTAMP(6),
+  isdel          INTEGER not null,
+  src_company_cd VARCHAR2(60),
+  src_cd         VARCHAR2(10) not null,
+  updt_by        NUMBER(16) not null,
+  updt_dt        TIMESTAMP(6) not null
+)
+;
+-- Add comments to the table 
+comment on table COMPY_WARNLEVELCHG_CMB
+  is 'TGT-行内预警等级认定';
+-- Add comments to the columns 
+comment on column COMPY_WARNLEVELCHG_CMB.warnchg_id
+  is '任务号';
+comment on column COMPY_WARNLEVELCHG_CMB.company_id
+  is '企业标识符';
+comment on column COMPY_WARNLEVELCHG_CMB.submit_dt
+  is '发起时间';
+comment on column COMPY_WARNLEVELCHG_CMB.warn_level
+  is '调整后客户风险分层';
+comment on column COMPY_WARNLEVELCHG_CMB.pre_warn_level
+  is '调整前客户风险分层';
+comment on column COMPY_WARNLEVELCHG_CMB.operate_module
+  is '变动来源';
+comment on column COMPY_WARNLEVELCHG_CMB.operate_dt
+  is '终批时间';
+comment on column COMPY_WARNLEVELCHG_CMB.isdel
+  is '是否删除';
+comment on column COMPY_WARNLEVELCHG_CMB.src_company_cd
+  is '源企业代码';
+comment on column COMPY_WARNLEVELCHG_CMB.src_cd
+  is '源系统';
+comment on column COMPY_WARNLEVELCHG_CMB.updt_by
+  is '更新人';
+comment on column COMPY_WARNLEVELCHG_CMB.updt_dt
+  is '更新时间';
+-- Create/Recreate indexes 
+create unique index U_COMPY_WARNLEVELCHG_CMB_INX on COMPY_WARNLEVELCHG_CMB (COMPANY_ID, SUBMIT_DT);
+-- Create/Recreate primary, unique and foreign key constraints 
+alter table COMPY_WARNLEVELCHG_CMB
+  add constraint PK_COMPY_WARNLEVELCHG_CMB primary key (WARNCHG_ID);
+alter table COMPY_WARNLEVELCHG_CMB
+  add constraint U_COMPY_WARNLEVELCHG_CMB_COT unique (COMPANY_ID, SUBMIT_DT);
+
+----------------------------------
+--  Changed table customer_cmb  --
+----------------------------------
+-- Add/modify columns 
+alter table CUSTOMER_CMB modify cust_no VARCHAR2(30);
+alter table CUSTOMER_CMB add rating_cd VARCHAR2(30);
+-- Add comments to the table 
+comment on table CUSTOMER_CMB
+  is '客户基本资料';
+-- Add comments to the columns 
+comment on column CUSTOMER_CMB.cust_no
+  is '核心系统客户编号';
+comment on column CUSTOMER_CMB.company_id
+  is '企业标识符';
+comment on column CUSTOMER_CMB.customer_nm
+  is '客户名称';
+comment on column CUSTOMER_CMB.org_num
+  is '组织机构代码';
+comment on column CUSTOMER_CMB.bl_numb
+  is '营业执照号';
+comment on column CUSTOMER_CMB.risk_status_cd
+  is '客户风险分层';
+comment on column CUSTOMER_CMB.class_grade_cd
+  is '最低十级分类';
+comment on column CUSTOMER_CMB.is_yjhplatform
+  is '是否银监会平台';
+comment on column CUSTOMER_CMB.is_loan
+  is '有贷标志';
+comment on column CUSTOMER_CMB.is_cmbrelatecust
+  is '是否我行关联客户';
+comment on column CUSTOMER_CMB.customer_grade_cd
+  is '客户分级（名单制新增）';
+comment on column CUSTOMER_CMB.is_high_risk
+  is '是否高风险名单';
+comment on column CUSTOMER_CMB.group_cust_no
+  is '所属集团核心号';
+comment on column CUSTOMER_CMB.group_nm
+  is '所属集团';
+comment on column CUSTOMER_CMB.group_warnstatus_cd
+  is '集团预警级别';
+comment on column CUSTOMER_CMB.is_guar
+  is '担保标志';
+comment on column CUSTOMER_CMB.guargrp_risklevel_cd
+  is '担保圈风险类型';
+comment on column CUSTOMER_CMB.rating_cd
+  is '客户评级结果代码';
+comment on column CUSTOMER_CMB.isdel
+  is '是否删除';
+comment on column CUSTOMER_CMB.src_company_cd
+  is '源企业代码';
+comment on column CUSTOMER_CMB.srcid
+  is '源系统主键';
+comment on column CUSTOMER_CMB.src_cd
+  is '源系统';
+comment on column CUSTOMER_CMB.updt_by
+  is '更新人';
+comment on column CUSTOMER_CMB.updt_dt
+  is '更新时间';
+-- Drop primary, unique and foreign key constraints 
+alter table CUSTOMER_CMB
+  drop constraint PK_CUSTOMER_CMB cascade;
+--------------------------------------
+--  New table etl_cmb_process_test  --
+--------------------------------------
+-- Create table
+create table ETL_CMB_PROCESS_TEST
+(
+  process_sid  NUMBER(16) not null,
+  process_nm   VARCHAR2(80) not null,
+  process_type VARCHAR2(30) not null,
+  frequency    VARCHAR2(30) not null,
+  target_table VARCHAR2(60) not null,
+  run_order    INTEGER not null,
+  active_flag  INTEGER not null,
+  updt_dt      TIMESTAMP(6) not null
+)
+;
+
+---------------------------------
+--  New table etl_tgt_loadlog  --
+---------------------------------
+-- Create table
+create table ETL_TGT_LOADLOG
+(
+  loadlog_sid       NUMBER(16) not null,
+  batch_sid         NUMBER(16) not null,
+  process_nm        VARCHAR2(80) not null,
+  orig_record_count NUMBER(16),
+  dup_record_count  NUMBER(16),
+  insert_count      NUMBER(16) not null,
+  updt_count        NUMBER(16) not null,
+  start_dt          TIMESTAMP(6) not null,
+  end_dt            TIMESTAMP(6) not null,
+  start_rowid       NUMBER(16),
+  end_rowid         NUMBER(16)
+)
+;
+-- Add comments to the columns 
+comment on column ETL_TGT_LOADLOG.loadlog_sid
+  is '日志流水号';
+comment on column ETL_TGT_LOADLOG.batch_sid
+  is '批次标识符';
+comment on column ETL_TGT_LOADLOG.process_nm
+  is '流程名称';
+comment on column ETL_TGT_LOADLOG.orig_record_count
+  is '原始的记录数';
+comment on column ETL_TGT_LOADLOG.dup_record_count
+  is '重复的记录数';
+comment on column ETL_TGT_LOADLOG.insert_count
+  is '插入记录数';
+comment on column ETL_TGT_LOADLOG.updt_count
+  is '更新记录数';
+comment on column ETL_TGT_LOADLOG.start_dt
+  is '开始时间';
+comment on column ETL_TGT_LOADLOG.end_dt
+  is '结束时间';
+comment on column ETL_TGT_LOADLOG.start_rowid
+  is '起始行号';
+comment on column ETL_TGT_LOADLOG.end_rowid
+  is '截止行号';
+
+----------------------------------
+--  Changed table lkp_constant  --
+----------------------------------
+-- Add comments to the columns 
+comment on column LKP_CONSTANT.constant_cd
+  is '常量代码';
+comment on column LKP_CONSTANT.constant_nm
+  is '代码名称';
+comment on column LKP_CONSTANT.parent_cd
+  is '上级代码';
+comment on column LKP_CONSTANT.constant_type
+  is '代码类别';
+comment on column LKP_CONSTANT.src_constant_cd
+  is '源数据代码';
+comment on column LKP_CONSTANT.remark
+  is '备注';
+comment on column LKP_CONSTANT.isdel
+  is '是否删除';
+comment on column LKP_CONSTANT.updt_dt
+  is '更新时间';
+------------------------------------
+--  New table lkp_warningtype_xw  --
+------------------------------------
+-- Create table
+create table LKP_WARNINGTYPE_XW
+(
+  warning_type_cd       VARCHAR2(10),
+  warning_subtype_cd    VARCHAR2(10),
+  srcwarning_subtype_cd VARCHAR2(10),
+  srcwarning_subtype    VARCHAR2(300),
+  srcwarning_type_cd    VARCHAR2(10),
+  srcwarning_type       VARCHAR2(300),
+  mapping_level         INTEGER,
+  mapping_src           VARCHAR2(30),
+  isdel                 INTEGER not null,
+  updt_dt               TIMESTAMP(6) not null
+)
+;
+-- Add comments to the columns 
+comment on column LKP_WARNINGTYPE_XW.warning_type_cd
+  is '中证预警风险大类编码';
+comment on column LKP_WARNINGTYPE_XW.warning_subtype_cd
+  is '中证预警风险子类别编码';
+comment on column LKP_WARNINGTYPE_XW.srcwarning_subtype_cd
+  is '源数据风险子类别编码';
+comment on column LKP_WARNINGTYPE_XW.srcwarning_subtype
+  is '源数据风险子类别';
+comment on column LKP_WARNINGTYPE_XW.srcwarning_type_cd
+  is '源数据风险大类编码';
+comment on column LKP_WARNINGTYPE_XW.srcwarning_type
+  is '源数据风险大类';
+comment on column LKP_WARNINGTYPE_XW.mapping_level
+  is '映射层级';
+comment on column LKP_WARNINGTYPE_XW.mapping_src
+  is '源数据来源';
+comment on column LKP_WARNINGTYPE_XW.isdel
+  is '是否删除';
+comment on column LKP_WARNINGTYPE_XW.updt_dt
+  is '更新时间';
+
+---------------------------------------
+--  Changed table lkp_warning_score  --
+---------------------------------------
+-- Drop columns 
+alter table LKP_WARNING_SCORE drop column left_bracket;
+alter table LKP_WARNING_SCORE drop column right_bracket;
+----------------------------------
+--  New table lkp_warning_type  --
+----------------------------------
+-- Create table
+create table LKP_WARNING_TYPE
+(
+  warning_subtype_cd VARCHAR2(10) not null,
+  warning_subtype    VARCHAR2(300),
+  warning_type_cd    VARCHAR2(10),
+  warning_type       VARCHAR2(300),
+  remark             VARCHAR2(500),
+  isdel              INTEGER not null,
+  updt_dt            TIMESTAMP(6) not null
+)
+;
+-- Add comments to the table 
+comment on table LKP_WARNING_TYPE
+  is 'TGT-中证预警风险';
+-- Add comments to the columns 
+comment on column LKP_WARNING_TYPE.warning_subtype_cd
+  is '风险子类别编码';
+comment on column LKP_WARNING_TYPE.warning_subtype
+  is '风险子类别';
+comment on column LKP_WARNING_TYPE.warning_type_cd
+  is '风险大类编码';
+comment on column LKP_WARNING_TYPE.warning_type
+  is '风险大类';
+comment on column LKP_WARNING_TYPE.remark
+  is '风险类型说明';
+comment on column LKP_WARNING_TYPE.isdel
+  is '是否删除';
+comment on column LKP_WARNING_TYPE.updt_dt
+  is '更新时间';
+
+rem Differences between CS_MASTER_TGT@CMS_DEV and CS_MASTER_TEST@CMS_DEV, created on 2017/12/19
+rem Press Apply button, or run in Command Window or SQL*Plus connected as CS_MASTER_TEST@CMS_DEV
+
+------------------------------------
+--  New table rating_rule_record  --
+------------------------------------
+-- Create table
+create table RATING_RULE_RECORD
+(
+  rating_rule_record_sid NUMBER(16) not null,
+  company_id             NUMBER(16) not null,
+  rating                 VARCHAR2(50),
+  rating_regulation_sid  NUMBER(16),
+  rating_evidence        CLOB,
+  client_id              NUMBER(16) not null,
+  updt_by                NUMBER(16) not null,
+  updt_dt                TIMESTAMP(6) not null
+)
+;
+-- Add comments to the columns 
+comment on column RATING_RULE_RECORD.rating_rule_record_sid
+  is '智能评价记录流水号';
+comment on column RATING_RULE_RECORD.company_id
+  is '企业标识符';
+comment on column RATING_RULE_RECORD.rating
+  is '智能评价结构';
+comment on column RATING_RULE_RECORD.rating_regulation_sid
+  is '评级规则流水号';
+comment on column RATING_RULE_RECORD.rating_evidence
+  is '评级依据';
+comment on column RATING_RULE_RECORD.client_id
+  is '客户标识符';
+comment on column RATING_RULE_RECORD.updt_by
+  is '更新人';
+comment on column RATING_RULE_RECORD.updt_dt
+  is '更新时间';
+-- Create/Recreate primary, unique and foreign key constraints 
+alter table RATING_RULE_RECORD
+  add constraint PK_RATING_RULE_RECORD primary key (RATING_RULE_RECORD_SID);
+
+
+  rem Differences between CS_MASTER_TGT@CMS_DEV and CS_MASTER_TEST@CMS_DEV, created on 2017/12/19
+rem Press Apply button, or run in Command Window or SQL*Plus connected as CS_MASTER_TEST@CMS_DEV
+
+----------------------------------------
+--  New table temp_bond_position_out  --
+----------------------------------------
+-- Create table
+create global temporary table TEMP_BOND_POSITION_OUT
+(
+  bond_position_out_sid NUMBER(16) not null,
+  secinner_id           NUMBER(16),
+  security_cd           VARCHAR2(100),
+  security_nm           VARCHAR2(300),
+  trade_market_id       NUMBER(16),
+  trustee_nm            VARCHAR2(300),
+  porfolio_cd           VARCHAR2(50),
+  portfolio_nm          VARCHAR2(300),
+  end_dt                DATE not null,
+  currency              VARCHAR2(10),
+  amt_cost              NUMBER(38,10),
+  amt_marketvalue       NUMBER(38,10),
+  position_num          NUMBER(38,10),
+  strategy_l1           VARCHAR2(100),
+  strategy_l2           VARCHAR2(100),
+  strategy_l3           VARCHAR2(100),
+  is_valid              INTEGER,
+  tsid                  VARCHAR2(100) not null,
+  src_updt_dt           TIMESTAMP(6),
+  isdel                 INTEGER not null,
+  updt_by               NUMBER(16) not null,
+  updt_dt               TIMESTAMP(6) not null,
+  record_sid            NUMBER(16),
+  loadlog_sid           INTEGER,
+  rnk                   INTEGER
+)
+on commit delete rows;
+-- Add comments to the table 
+comment on table TEMP_BOND_POSITION_OUT
+  is 'TEMP-委外持仓';
+-- Add comments to the columns 
+comment on column TEMP_BOND_POSITION_OUT.bond_position_out_sid
+  is '自主持仓流水号';
+comment on column TEMP_BOND_POSITION_OUT.secinner_id
+  is '债券标识符';
+comment on column TEMP_BOND_POSITION_OUT.security_cd
+  is '债券代码';
+comment on column TEMP_BOND_POSITION_OUT.security_nm
+  is '债券全称';
+comment on column TEMP_BOND_POSITION_OUT.trade_market_id
+  is '交易市场';
+comment on column TEMP_BOND_POSITION_OUT.trustee_nm
+  is '委外机构名称';
+comment on column TEMP_BOND_POSITION_OUT.porfolio_cd
+  is '组合代码';
+comment on column TEMP_BOND_POSITION_OUT.portfolio_nm
+  is '组合名称';
+comment on column TEMP_BOND_POSITION_OUT.end_dt
+  is '持仓日期';
+comment on column TEMP_BOND_POSITION_OUT.currency
+  is '币种';
+comment on column TEMP_BOND_POSITION_OUT.amt_cost
+  is '持仓余额-成本法';
+comment on column TEMP_BOND_POSITION_OUT.amt_marketvalue
+  is '持仓余额-市值法';
+comment on column TEMP_BOND_POSITION_OUT.position_num
+  is '持仓数量';
+comment on column TEMP_BOND_POSITION_OUT.strategy_l1
+  is '策略1级分类';
+comment on column TEMP_BOND_POSITION_OUT.strategy_l2
+  is '策略2级分类';
+comment on column TEMP_BOND_POSITION_OUT.strategy_l3
+  is '策略3级分类';
+comment on column TEMP_BOND_POSITION_OUT.is_valid
+  is '是否有效';
+comment on column TEMP_BOND_POSITION_OUT.tsid
+  is '唯一标识';
+comment on column TEMP_BOND_POSITION_OUT.src_updt_dt
+  is '源更新时间';
+comment on column TEMP_BOND_POSITION_OUT.isdel
+  is '是否删除';
+comment on column TEMP_BOND_POSITION_OUT.updt_by
+  is '更新人';
+comment on column TEMP_BOND_POSITION_OUT.updt_dt
+  is '更新时间';
+
+----------------------------------------
+--  New table temp_bond_position_own  --
+----------------------------------------
+-- Create table
+create global temporary table TEMP_BOND_POSITION_OWN
+(
+  bond_position_own_sid NUMBER(16) not null,
+  secinner_id           NUMBER(16) not null,
+  security_cd           VARCHAR2(100),
+  security_nm           VARCHAR2(300),
+  trade_market_id       NUMBER(16),
+  security_snm          VARCHAR2(300),
+  portfolio_cd          VARCHAR2(50),
+  portfolio_nm          VARCHAR2(300),
+  end_dt                DATE not null,
+  currency              VARCHAR2(10),
+  amt_cost              NUMBER(38,10),
+  amt_marketvalue       NUMBER(38,10),
+  position_num          NUMBER(38,10),
+  src_updt_dt           TIMESTAMP(6),
+  isdel                 INTEGER not null,
+  updt_by               NUMBER(16) not null,
+  record_sid            NUMBER(16),
+  loadlog_sid           INTEGER,
+  updt_dt               TIMESTAMP(6) not null,
+  rnk                   NUMBER
+)
+on commit delete rows;
+-- Add comments to the table 
+comment on table TEMP_BOND_POSITION_OWN
+  is 'TEMP-自主持仓';
+-- Add comments to the columns 
+comment on column TEMP_BOND_POSITION_OWN.bond_position_own_sid
+  is '自主持仓流水号';
+comment on column TEMP_BOND_POSITION_OWN.secinner_id
+  is '债券标识符';
+comment on column TEMP_BOND_POSITION_OWN.security_cd
+  is '债券代码';
+comment on column TEMP_BOND_POSITION_OWN.security_nm
+  is '债券全称';
+comment on column TEMP_BOND_POSITION_OWN.trade_market_id
+  is '交易市场';
+comment on column TEMP_BOND_POSITION_OWN.security_snm
+  is '债券简称';
+comment on column TEMP_BOND_POSITION_OWN.portfolio_cd
+  is '组合代码';
+comment on column TEMP_BOND_POSITION_OWN.portfolio_nm
+  is '组合名称';
+comment on column TEMP_BOND_POSITION_OWN.end_dt
+  is '持仓日期';
+comment on column TEMP_BOND_POSITION_OWN.currency
+  is '币种';
+comment on column TEMP_BOND_POSITION_OWN.amt_cost
+  is '持仓余额-成本法';
+comment on column TEMP_BOND_POSITION_OWN.amt_marketvalue
+  is '持仓余额-市值法';
+comment on column TEMP_BOND_POSITION_OWN.position_num
+  is '持仓数量';
+comment on column TEMP_BOND_POSITION_OWN.src_updt_dt
+  is '源更新时间';
+comment on column TEMP_BOND_POSITION_OWN.isdel
+  is '是否删除';
+comment on column TEMP_BOND_POSITION_OWN.updt_by
+  is '更新人';
+comment on column TEMP_BOND_POSITION_OWN.record_sid
+  is '流水号';
+comment on column TEMP_BOND_POSITION_OWN.loadlog_sid
+  is '日志号';
+comment on column TEMP_BOND_POSITION_OWN.updt_dt
+  is '更新时间';
+comment on column TEMP_BOND_POSITION_OWN.rnk
+  is '记录序列';
+
+-----------------------------------------------
+--  New table temp_bond_position_structured  --
+-----------------------------------------------
+-- Create table
+create global temporary table TEMP_BOND_POSITION_STRUCTURED
+(
+  bond_position_structured_sid NUMBER(16) not null,
+  secinner_id                  NUMBER(16) not null,
+  security_cd                  VARCHAR2(100),
+  security_nm                  VARCHAR2(300),
+  trade_market_id              NUMBER(16),
+  porfolio_cd                  VARCHAR2(50),
+  portfolio_nm                 VARCHAR2(300),
+  end_dt                       DATE not null,
+  currency                     VARCHAR2(10),
+  amt_cost                     NUMBER(38,10),
+  amt_marketvalue              NUMBER(38,10),
+  position_num                 NUMBER(38,10),
+  strategy_l1                  VARCHAR2(100),
+  strategy_l2                  VARCHAR2(100),
+  strategy_l3                  VARCHAR2(100),
+  is_valid                     INTEGER,
+  tsid                         VARCHAR2(100),
+  src_updt_dt                  TIMESTAMP(6),
+  isdel                        INTEGER not null,
+  updt_by                      NUMBER(16) not null,
+  updt_dt                      TIMESTAMP(6) not null,
+  record_sid                   NUMBER(16),
+  loadlog_sid                  INTEGER,
+  rnk                          NUMBER
+)
+on commit delete rows;
+-- Add comments to the columns 
+comment on column TEMP_BOND_POSITION_STRUCTURED.bond_position_structured_sid
+  is '自主持仓流水号';
+comment on column TEMP_BOND_POSITION_STRUCTURED.secinner_id
+  is '债券标识符';
+comment on column TEMP_BOND_POSITION_STRUCTURED.security_cd
+  is '债券代码';
+comment on column TEMP_BOND_POSITION_STRUCTURED.security_nm
+  is '债券全称';
+comment on column TEMP_BOND_POSITION_STRUCTURED.trade_market_id
+  is '交易市场';
+comment on column TEMP_BOND_POSITION_STRUCTURED.porfolio_cd
+  is '组合代码';
+comment on column TEMP_BOND_POSITION_STRUCTURED.portfolio_nm
+  is '组合名称';
+comment on column TEMP_BOND_POSITION_STRUCTURED.end_dt
+  is '持仓日期';
+comment on column TEMP_BOND_POSITION_STRUCTURED.currency
+  is '币种';
+comment on column TEMP_BOND_POSITION_STRUCTURED.amt_cost
+  is '持仓余额-成本法';
+comment on column TEMP_BOND_POSITION_STRUCTURED.amt_marketvalue
+  is '持仓余额-市值法';
+comment on column TEMP_BOND_POSITION_STRUCTURED.position_num
+  is '持仓数量';
+comment on column TEMP_BOND_POSITION_STRUCTURED.strategy_l1
+  is '策略1级分类';
+comment on column TEMP_BOND_POSITION_STRUCTURED.strategy_l2
+  is '策略2级分类';
+comment on column TEMP_BOND_POSITION_STRUCTURED.strategy_l3
+  is '策略3级分类';
+comment on column TEMP_BOND_POSITION_STRUCTURED.is_valid
+  is '是否有效';
+comment on column TEMP_BOND_POSITION_STRUCTURED.tsid
+  is '唯一标识';
+comment on column TEMP_BOND_POSITION_STRUCTURED.src_updt_dt
+  is '源更新时间';
+comment on column TEMP_BOND_POSITION_STRUCTURED.isdel
+  is '是否删除';
+comment on column TEMP_BOND_POSITION_STRUCTURED.updt_by
+  is '更新人';
+comment on column TEMP_BOND_POSITION_STRUCTURED.updt_dt
+  is '更新时间';
+
+--------------------------------------
+--  New table temp_bond_valuations  --
+--------------------------------------
+-- Create table
+create table TEMP_BOND_VALUATIONS
+(
+  bond_valuations_sid NUMBER(16) not null,
+  secinner_id         NUMBER(16) not null,
+  trade_dt_curr       DATE,
+  trade_dt_pre        DATE,
+  value_curr          NUMBER(24,8),
+  value_pre           NUMBER,
+  src_cd              VARCHAR2(10) not null,
+  rnk                 INTEGER,
+  data_type           VARCHAR2(10)
+)
+;
+
+-------------------------------------------
+--  New table temp_bond_valuations_curr  --
+-------------------------------------------
+-- Create table
+create table TEMP_BOND_VALUATIONS_CURR
+(
+  bond_valuations_sid NUMBER(16),
+  secinner_id         NUMBER(16),
+  trade_dt            DATE,
+  value               NUMBER,
+  type                NUMBER,
+  src_cd              VARCHAR2(10),
+  trade_dt_pre        DATE
+)
+;
+
+--------------------------------------------
+--  New table temp_bond_valuations_index  --
+--------------------------------------------
+-- Create table
+create table TEMP_BOND_VALUATIONS_INDEX
+(
+  bond_valuations_sid NUMBER(16),
+  secinner_id         NUMBER(16),
+  trade_dt            DATE,
+  value_curr          NUMBER,
+  type                NUMBER,
+  src_cd              VARCHAR2(10),
+  trade_dt_pre        DATE,
+  value_pre           NUMBER,
+  index_value         NUMBER,
+  flag                NUMBER,
+  key                 VARCHAR2(20)
+)
+;
+
+------------------------------------------
+--  New table temp_bond_valuations_mid  --
+------------------------------------------
+-- Create table
+create table TEMP_BOND_VALUATIONS_MID
+(
+  company_id      NUMBER(16),
+  secinner_id     NUMBER(16),
+  notice_dt       DATE,
+  score           NUMBER,
+  src_cd          VARCHAR2(10),
+  warning_content CLOB
+)
+;
+
+------------------------------------------
+--  New table temp_bond_valuations_ret  --
+------------------------------------------
+-- Create table
+create table TEMP_BOND_VALUATIONS_RET
+(
+  compy_warnings_sid INTEGER,
+  company_id         NUMBER(16),
+  secinner_id        NUMBER(16),
+  notice_dt          DATE,
+  score              NUMBER,
+  src_cd             VARCHAR2(10),
+  warning_content    VARCHAR2(277)
+)
+;
+
+----------------------------------------
+--  New table temp_bond_valuations_t  --
+----------------------------------------
+-- Create table
+create table TEMP_BOND_VALUATIONS_T
+(
+  company_id      NUMBER(16),
+  notice_dt       DATE,
+  score           NUMBER,
+  src_cd          VARCHAR2(10),
+  warning_content CLOB
+)
+;
+
+------------------------------------------
+--  New table temp_bond_valuations_tmp  --
+------------------------------------------
+-- Create table
+create table TEMP_BOND_VALUATIONS_TMP
+(
+  bond_valuations_sid NUMBER(16) not null,
+  company_id          NUMBER(16),
+  secinner_id         NUMBER(16),
+  notice_dt           DATE,
+  src_cd              VARCHAR2(10) not null,
+  score1              NUMBER,
+  score2              NUMBER,
+  score3              NUMBER,
+  note1               VARCHAR2(277),
+  note2               VARCHAR2(277),
+  note3               VARCHAR2(277),
+  src_secinnner_id    VARCHAR2(30)
+)
+;
+
+--------------------------------------------
+--  New table temp_compy_creditapply_cmb  --
+--------------------------------------------
+-- Create table
+create global temporary table TEMP_COMPY_CREDITAPPLY_CMB
+(
+  data_dt            VARCHAR2(100),
+  creditapply_id     VARCHAR2(30),
+  cust_no            VARCHAR2(30),
+  company_id         NUMBER(16),
+  submit_dt          VARCHAR2(100),
+  operate_orgid      VARCHAR2(100),
+  operate_orgnm      VARCHAR2(300),
+  term_month         VARCHAR2(100),
+  exposure_amt       VARCHAR2(100),
+  nominal_amt        VARCHAR2(100),
+  is_lowrisk         VARCHAR2(100),
+  apply_status       VARCHAR2(100),
+  apply_comment      VARCHAR2(4000),
+  apply_final_cd     VARCHAR2(100),
+  creditline_type_cd VARCHAR2(30),
+  business_cd        VARCHAR2(100),
+  sub_business_cd    VARCHAR2(100),
+  final_exposure_amt VARCHAR2(100),
+  final_nominal_amt  VARCHAR2(100),
+  record_sid         NUMBER(16),
+  loadlog_sid        INTEGER,
+  updt_dt            TIMESTAMP(6),
+  rnk                NUMBER
+)
+on commit delete rows;
+
+-------------------------------------------
+--  New table temp_compy_creditinfo_cmb  --
+-------------------------------------------
+-- Create table
+create global temporary table TEMP_COMPY_CREDITINFO_CMB
+(
+  data_dt            VARCHAR2(100),
+  creditinfo_id      VARCHAR2(30),
+  cust_no            VARCHAR2(30),
+  company_id         NUMBER(16),
+  exposure_amt       VARCHAR2(100),
+  nominal_amt        VARCHAR2(100),
+  exposure_balance   VARCHAR2(100),
+  exposure_remain    VARCHAR2(100),
+  start_dt           VARCHAR2(100),
+  end_dt             VARCHAR2(100),
+  is_cmbrelatecust   VARCHAR2(100),
+  creditline_type_cd VARCHAR2(30),
+  is_lowrisk         VARCHAR2(100),
+  use_org_id         VARCHAR2(100),
+  use_org_nm         VARCHAR2(300),
+  loan_mode_cd       VARCHAR2(30),
+  credit_status_cd   VARCHAR2(30),
+  is_exposure        VARCHAR2(100),
+  currency           VARCHAR2(30),
+  total_loan_amt     VARCHAR2(100),
+  business_balance   VARCHAR2(100),
+  term_month         VARCHAR2(100),
+  guaranty_type_cd   VARCHAR2(30),
+  record_sid         NUMBER(16),
+  loadlog_sid        INTEGER,
+  updt_dt            TIMESTAMP(6),
+  rnk                NUMBER
+)
+on commit delete rows;
+
+---------------------------------------------
+--  New table temp_compy_creditrating_cmb  --
+---------------------------------------------
+-- Create table
+create global temporary table TEMP_COMPY_CREDITRATING_CMB
+(
+  data_dt              VARCHAR2(100),
+  rating_no            VARCHAR2(100),
+  cust_no              VARCHAR2(30),
+  company_id           NUMBER(16),
+  auto_rating          VARCHAR2(10),
+  final_rating         VARCHAR2(10),
+  rating_period        VARCHAR2(100),
+  rating_start_dt      VARCHAR2(100),
+  effect_end_dt        VARCHAR2(100),
+  autorating_avgpd     VARCHAR2(100),
+  finalrating_avgpd    VARCHAR2(100),
+  adjust_reasontype_cd VARCHAR2(100),
+  adjust_reason        VARCHAR2(4000),
+  record_sid           NUMBER(16),
+  loadlog_sid          INTEGER,
+  updt_dt              TIMESTAMP(6),
+  rnk                  NUMBER
+)
+on commit delete rows;
+
+-------------------------------------------
+--  New table temp_compy_groupgraph_cmb  --
+-------------------------------------------
+-- Create table
+create global temporary table TEMP_COMPY_GROUPGRAPH_CMB
+(
+  compy_groupgraph_sid NUMBER(16) not null,
+  father_cust_no       VARCHAR2(30),
+  child_cust_no        VARCHAR2(30),
+  relation_type_cd     VARCHAR2(30),
+  direct_shratio       NUMBER(24,4),
+  remark               VARCHAR2(500),
+  isdel                INTEGER not null,
+  src_company_cd       VARCHAR2(60),
+  src_cd               VARCHAR2(10) not null,
+  updt_by              NUMBER(16) not null,
+  updt_dt              TIMESTAMP(6) not null,
+  rnk                  INTEGER,
+  record_sid           NUMBER(16),
+  loadlog_sid          INTEGER
+)
+on commit delete rows;
+-- Add comments to the table 
+comment on table TEMP_COMPY_GROUPGRAPH_CMB
+  is 'TEMP-所属集团图谱';
+-- Add comments to the columns 
+comment on column TEMP_COMPY_GROUPGRAPH_CMB.compy_groupgraph_sid
+  is '评级业务编号';
+comment on column TEMP_COMPY_GROUPGRAPH_CMB.father_cust_no
+  is '持股机构核心客户号';
+comment on column TEMP_COMPY_GROUPGRAPH_CMB.child_cust_no
+  is '被持股机企业号';
+comment on column TEMP_COMPY_GROUPGRAPH_CMB.relation_type_cd
+  is '关联关系';
+comment on column TEMP_COMPY_GROUPGRAPH_CMB.direct_shratio
+  is '直接持股比例';
+comment on column TEMP_COMPY_GROUPGRAPH_CMB.remark
+  is '备注';
+comment on column TEMP_COMPY_GROUPGRAPH_CMB.isdel
+  is '是否删除';
+comment on column TEMP_COMPY_GROUPGRAPH_CMB.src_company_cd
+  is '源企业代码';
+comment on column TEMP_COMPY_GROUPGRAPH_CMB.src_cd
+  is '源系统';
+comment on column TEMP_COMPY_GROUPGRAPH_CMB.updt_by
+  is '更新人';
+comment on column TEMP_COMPY_GROUPGRAPH_CMB.updt_dt
+  is '更新时间';
+comment on column TEMP_COMPY_GROUPGRAPH_CMB.rnk
+  is '记录序列';
+comment on column TEMP_COMPY_GROUPGRAPH_CMB.record_sid
+  is '流水号';
+comment on column TEMP_COMPY_GROUPGRAPH_CMB.loadlog_sid
+  is '日志号';
+
+---------------------------------------------
+--  New table temp_compy_groupwarning_cmb  --
+---------------------------------------------
+-- Create table
+create global temporary table TEMP_COMPY_GROUPWARNING_CMB
+(
+  compy_groupwarning_sid NUMBER(16) not null,
+  company_id             NUMBER(16) not null,
+  group_id               VARCHAR2(30),
+  group_nm               VARCHAR2(300),
+  is_private_group       INTEGER,
+  risk_status_cd         VARCHAR2(30),
+  confirm_reason         VARCHAR2(1000),
+  ctrl_measures          VARCHAR2(1000),
+  affirm_dt              TIMESTAMP(6),
+  affirm_orgid           INTEGER,
+  affirm_orgnm           VARCHAR2(300),
+  isdel                  INTEGER not null,
+  src_company_cd         VARCHAR2(60),
+  src_cd                 VARCHAR2(10) not null,
+  updt_by                NUMBER(16) not null,
+  updt_dt                TIMESTAMP(6) not null,
+  rnk                    INTEGER,
+  record_sid             NUMBER(16),
+  loadlog_sid            INTEGER
+)
+on commit delete rows;
+-- Add comments to the table 
+comment on table TEMP_COMPY_GROUPWARNING_CMB
+  is 'TEMP-所属集团预警';
+-- Add comments to the columns 
+comment on column TEMP_COMPY_GROUPWARNING_CMB.compy_groupwarning_sid
+  is '所属集团预警流水号';
+comment on column TEMP_COMPY_GROUPWARNING_CMB.company_id
+  is '企业标识符';
+comment on column TEMP_COMPY_GROUPWARNING_CMB.group_id
+  is '所属集团核心客户号';
+comment on column TEMP_COMPY_GROUPWARNING_CMB.group_nm
+  is '所属集团名称';
+comment on column TEMP_COMPY_GROUPWARNING_CMB.is_private_group
+  is '是否民营企业';
+comment on column TEMP_COMPY_GROUPWARNING_CMB.risk_status_cd
+  is '集团客户风险分层';
+comment on column TEMP_COMPY_GROUPWARNING_CMB.confirm_reason
+  is '认定原因';
+comment on column TEMP_COMPY_GROUPWARNING_CMB.ctrl_measures
+  is '管控措施';
+comment on column TEMP_COMPY_GROUPWARNING_CMB.affirm_dt
+  is '认定时间';
+comment on column TEMP_COMPY_GROUPWARNING_CMB.affirm_orgid
+  is '认定机构';
+comment on column TEMP_COMPY_GROUPWARNING_CMB.affirm_orgnm
+  is '认定机构名称';
+comment on column TEMP_COMPY_GROUPWARNING_CMB.isdel
+  is '是否删除';
+comment on column TEMP_COMPY_GROUPWARNING_CMB.src_company_cd
+  is '源企业代码';
+comment on column TEMP_COMPY_GROUPWARNING_CMB.src_cd
+  is '源系统';
+comment on column TEMP_COMPY_GROUPWARNING_CMB.updt_by
+  is '更新人';
+comment on column TEMP_COMPY_GROUPWARNING_CMB.updt_dt
+  is '更新时间';
+comment on column TEMP_COMPY_GROUPWARNING_CMB.rnk
+  is '记录序列';
+comment on column TEMP_COMPY_GROUPWARNING_CMB.record_sid
+  is '流水号';
+comment on column TEMP_COMPY_GROUPWARNING_CMB.loadlog_sid
+  is '日志号';
+
+---------------------------------------------
+--  New table temp_compy_highrisklist_cmb  --
+---------------------------------------------
+-- Create table
+create global temporary table TEMP_COMPY_HIGHRISKLIST_CMB
+(
+  hishgrisklist_id  INTEGER not null,
+  company_id        NUMBER(16) not null,
+  list_type_cd      VARCHAR2(30),
+  blacklist_srccd   VARCHAR2(30),
+  blacklist_type_cd VARCHAR2(30),
+  eff_dt            DATE,
+  confirm_reason    VARCHAR2(1000),
+  ctl_measure       VARCHAR2(2000),
+  eff_flag          INTEGER,
+  isdel             INTEGER not null,
+  src_company_cd    VARCHAR2(60),
+  src_cd            VARCHAR2(10) not null,
+  updt_by           NUMBER(16) not null,
+  updt_dt           TIMESTAMP(6) not null,
+  rnk               INTEGER,
+  record_sid        NUMBER(16),
+  loadlog_sid       INTEGER
+)
+on commit delete rows;
+-- Add comments to the table 
+comment on table TEMP_COMPY_HIGHRISKLIST_CMB
+  is 'TEMP-高风险类名单';
+-- Add comments to the columns 
+comment on column TEMP_COMPY_HIGHRISKLIST_CMB.hishgrisklist_id
+  is '流水号';
+comment on column TEMP_COMPY_HIGHRISKLIST_CMB.company_id
+  is '企业标识符';
+comment on column TEMP_COMPY_HIGHRISKLIST_CMB.list_type_cd
+  is '名单类型';
+comment on column TEMP_COMPY_HIGHRISKLIST_CMB.blacklist_srccd
+  is '黑名单来源';
+comment on column TEMP_COMPY_HIGHRISKLIST_CMB.blacklist_type_cd
+  is '黑名单客户类型';
+comment on column TEMP_COMPY_HIGHRISKLIST_CMB.eff_dt
+  is '生效日期';
+comment on column TEMP_COMPY_HIGHRISKLIST_CMB.confirm_reason
+  is '认定原因';
+comment on column TEMP_COMPY_HIGHRISKLIST_CMB.ctl_measure
+  is '管控措施';
+comment on column TEMP_COMPY_HIGHRISKLIST_CMB.eff_flag
+  is '是否生效';
+comment on column TEMP_COMPY_HIGHRISKLIST_CMB.isdel
+  is '是否删除';
+comment on column TEMP_COMPY_HIGHRISKLIST_CMB.src_company_cd
+  is '源企业代码';
+comment on column TEMP_COMPY_HIGHRISKLIST_CMB.src_cd
+  is '源系统';
+comment on column TEMP_COMPY_HIGHRISKLIST_CMB.updt_by
+  is '更新人';
+comment on column TEMP_COMPY_HIGHRISKLIST_CMB.updt_dt
+  is '更新时间';
+comment on column TEMP_COMPY_HIGHRISKLIST_CMB.rnk
+  is '记录序列';
+comment on column TEMP_COMPY_HIGHRISKLIST_CMB.record_sid
+  is '流水号';
+comment on column TEMP_COMPY_HIGHRISKLIST_CMB.loadlog_sid
+  is '日志号';
+
+--------------------------------------
+--  New table temp_compy_limit_cmb  --
+--------------------------------------
+-- Create table
+create global temporary table TEMP_COMPY_LIMIT_CMB
+(
+  data_dt            VARCHAR2(100),
+  cust_no            VARCHAR2(30),
+  company_id         NUMBER(16),
+  limit_type_cd      VARCHAR2(30),
+  limit_status_cd    VARCHAR2(30),
+  is_frozen          VARCHAR2(30),
+  org_id             VARCHAR2(100),
+  org_nm             VARCHAR2(300),
+  currency           VARCHAR2(100),
+  apply_limit        VARCHAR2(100),
+  apply_valid_months VARCHAR2(100),
+  apply_detail       VARCHAR2(4000),
+  cust_limit         VARCHAR2(100),
+  limit_usageratio   VARCHAR2(100),
+  limit_used         VARCHAR2(100),
+  limit_notused      VARCHAR2(100),
+  limit_tmpover_amt  VARCHAR2(100),
+  limit_tmpover_dt   VARCHAR2(100),
+  eff_dt             VARCHAR2(100),
+  due_dt             VARCHAR2(100),
+  record_sid         NUMBER(16),
+  loadlog_sid        INTEGER,
+  updt_dt            TIMESTAMP(6),
+  rnk                NUMBER
+)
+on commit delete rows;
+
+-----------------------------------------------
+--  New table temp_compy_operationclear_cmb  --
+-----------------------------------------------
+-- Create table
+create global temporary table TEMP_COMPY_OPERATIONCLEAR_CMB
+(
+  compy_operationclear_sid NUMBER(16) not null,
+  company_id               NUMBER(16) not null,
+  rpt_dt                   DATE not null,
+  currency                 VARCHAR2(30),
+  all_amt_in               NUMBER(24,4),
+  all_amt_out              NUMBER(24,4),
+  avg_balance_cury         NUMBER(24,4),
+  avg_grtbalance_cury      NUMBER(24,4),
+  avg_loanbalance_cury     NUMBER(24,4),
+  loan_deposit_ratio       NUMBER(38,10),
+  gur_group                VARCHAR2(10),
+  balance_sixmon           NUMBER(38,10),
+  bal_1y_uptimes           INTEGER,
+  bal_1y_uptimes_group     VARCHAR2(10),
+  bbk_nm                   VARCHAR2(300),
+  cust_cnt                 INTEGER,
+  pd_cust_cnt              INTEGER,
+  pd_inf                   NUMBER(38,10),
+  group_nm                 VARCHAR2(10),
+  isdel                    INTEGER not null,
+  src_company_cd           VARCHAR2(60),
+  src_cd                   VARCHAR2(10) not null,
+  updt_by                  NUMBER(16) not null,
+  updt_dt                  TIMESTAMP(6) not null,
+  record_sid               NUMBER(16),
+  loadlog_sid              INTEGER,
+  rnk                      NUMBER
+)
+on commit delete rows;
+-- Add comments to the table 
+comment on table TEMP_COMPY_OPERATIONCLEAR_CMB
+  is 'TEMP-经营指标及结算汇总表';
+-- Add comments to the columns 
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.compy_operationclear_sid
+  is '经营指标及结算汇总编号';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.company_id
+  is '企业标识符';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.rpt_dt
+  is '日期';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.currency
+  is '币种代码';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.all_amt_in
+  is '合计资金转入';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.all_amt_out
+  is '合计资金转出';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.avg_balance_cury
+  is '本年存款日均余额';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.avg_grtbalance_cury
+  is '本年保证金日均余额';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.avg_loanbalance_cury
+  is '本年贷款日均余额';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.loan_deposit_ratio
+  is '存贷比';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.gur_group
+  is '担保圈';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.balance_sixmon
+  is '结算账户近6个月月均余额';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.bal_1y_uptimes
+  is '客户过去一年月末存款余额发生大额增加的次数_U卡';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.bal_1y_uptimes_group
+  is '客户过去一年月末存款余额发生大额增加的次数分组_U卡';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.bbk_nm
+  is '管理分行名称';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.cust_cnt
+  is '十二个月前or三月前客户数量';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.pd_cust_cnt
+  is '十二个月后or三月后违约客户数量';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.pd_inf
+  is '违约概率';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.group_nm
+  is '所属分组';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.isdel
+  is '是否删除';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.src_company_cd
+  is '源企业代码';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.src_cd
+  is '源系统';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.updt_by
+  is '更新人';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.updt_dt
+  is '更新时间';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.record_sid
+  is '流水号';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.loadlog_sid
+  is '日志号';
+comment on column TEMP_COMPY_OPERATIONCLEAR_CMB.rnk
+  is '记录序列';
+
+------------------------------------------------
+--  New table temp_compy_overdueinterest_cmb  --
+------------------------------------------------
+-- Create table
+create global temporary table TEMP_COMPY_OVERDUEINTEREST_CMB
+(
+  data_dt              VARCHAR2(100),
+  cust_no              VARCHAR2(30),
+  company_id           NUMBER(16),
+  overdue_amt          VARCHAR2(100),
+  innerdebt_amt        VARCHAR2(100),
+  outerdebt_amt        VARCHAR2(100),
+  earliest_overdue_dt  VARCHAR2(100),
+  longest_overdue_days VARCHAR2(100),
+  record_sid           NUMBER(16),
+  loadlog_sid          INTEGER,
+  updt_dt              TIMESTAMP(6),
+  rnk                  NUMBER
+)
+on commit delete rows;
+
+------------------------------------------
+--  New table temp_compy_pbccredit_cmb  --
+------------------------------------------
+-- Create table
+create global temporary table TEMP_COMPY_PBCCREDIT_CMB
+(
+  data_dt           VARCHAR2(100),
+  cust_no           VARCHAR2(30),
+  company_id        NUMBER(16),
+  rpt_dt            VARCHAR2(100),
+  normal_no         VARCHAR2(100),
+  normal_balance    VARCHAR2(100),
+  concerned_no      VARCHAR2(100),
+  concerned_balance VARCHAR2(100),
+  bad_no            VARCHAR2(100),
+  bad_balance       VARCHAR2(100),
+  total_no          VARCHAR2(100),
+  total_balance     VARCHAR2(100),
+  record_sid        NUMBER(16),
+  loadlog_sid       INTEGER,
+  updt_dt           TIMESTAMP(6),
+  rnk               NUMBER
+)
+on commit delete rows;
+
+----------------------------------------
+--  New table temp_compy_pbcguar_cmb  --
+----------------------------------------
+-- Create table
+create global temporary table TEMP_COMPY_PBCGUAR_CMB
+(
+  compy_pbcguar_sid  NUMBER(16) not null,
+  msg_id             VARCHAR2(30),
+  grtser_id          INTEGER,
+  grtbusser_id       INTEGER,
+  company_id         NUMBER(16) not null,
+  rpt_dt             DATE,
+  warrantee_id       INTEGER,
+  warrantee_nm       VARCHAR2(300),
+  currency           VARCHAR2(30),
+  guar_amt           NUMBER(24,4),
+  guar_type_cd       VARCHAR2(30),
+  balance            INTEGER,
+  end_dt             DATE,
+  five_class_cd      VARCHAR2(30),
+  warrantee_currency VARCHAR2(30),
+  isdel              INTEGER not null,
+  src_company_cd     VARCHAR2(60),
+  src_cd             VARCHAR2(10) not null,
+  updt_by            NUMBER(16) not null,
+  updt_dt            TIMESTAMP(6) not null,
+  rnk                INTEGER,
+  record_sid         NUMBER(16),
+  loadlog_sid        INTEGER
+)
+on commit delete rows;
+-- Add comments to the table 
+comment on table TEMP_COMPY_PBCGUAR_CMB
+  is 'TEMP-担保信息';
+-- Add comments to the columns 
+comment on column TEMP_COMPY_PBCGUAR_CMB.compy_pbcguar_sid
+  is '评级业务编号';
+comment on column TEMP_COMPY_PBCGUAR_CMB.msg_id
+  is '报文标识符';
+comment on column TEMP_COMPY_PBCGUAR_CMB.grtser_id
+  is '担保合同流水号';
+comment on column TEMP_COMPY_PBCGUAR_CMB.grtbusser_id
+  is '被担保业务流水号';
+comment on column TEMP_COMPY_PBCGUAR_CMB.company_id
+  is '企业标识符';
+comment on column TEMP_COMPY_PBCGUAR_CMB.rpt_dt
+  is '报告日期';
+comment on column TEMP_COMPY_PBCGUAR_CMB.warrantee_id
+  is '被担保人核心客户号';
+comment on column TEMP_COMPY_PBCGUAR_CMB.warrantee_nm
+  is '被担保人名称';
+comment on column TEMP_COMPY_PBCGUAR_CMB.currency
+  is '担保币种';
+comment on column TEMP_COMPY_PBCGUAR_CMB.guar_amt
+  is '担保金额';
+comment on column TEMP_COMPY_PBCGUAR_CMB.guar_type_cd
+  is '担保形式';
+comment on column TEMP_COMPY_PBCGUAR_CMB.balance
+  is '被担保业务余额';
+comment on column TEMP_COMPY_PBCGUAR_CMB.end_dt
+  is '被担保业务结清（到期）日期';
+comment on column TEMP_COMPY_PBCGUAR_CMB.five_class_cd
+  is '被担保业务五级分类';
+comment on column TEMP_COMPY_PBCGUAR_CMB.warrantee_currency
+  is '被担保业务币种';
+comment on column TEMP_COMPY_PBCGUAR_CMB.isdel
+  is '是否删除';
+comment on column TEMP_COMPY_PBCGUAR_CMB.src_company_cd
+  is '源企业代码';
+comment on column TEMP_COMPY_PBCGUAR_CMB.src_cd
+  is '源系统';
+comment on column TEMP_COMPY_PBCGUAR_CMB.updt_by
+  is '更新人';
+comment on column TEMP_COMPY_PBCGUAR_CMB.updt_dt
+  is '更新时间';
+comment on column TEMP_COMPY_PBCGUAR_CMB.rnk
+  is '记录序列';
+comment on column TEMP_COMPY_PBCGUAR_CMB.record_sid
+  is '流水号';
+comment on column TEMP_COMPY_PBCGUAR_CMB.loadlog_sid
+  is '日志号';
+
+------------------------------------------
+--  New table temp_compy_pbcguar_cmb_a  --
+------------------------------------------
+-- Create table
+create table TEMP_COMPY_PBCGUAR_CMB_A
+(
+  compy_pbcguar_sid  NUMBER(16) not null,
+  msg_id             VARCHAR2(30),
+  grtser_id          INTEGER,
+  grtbusser_id       INTEGER,
+  company_id         NUMBER(16) not null,
+  rpt_dt             DATE,
+  warrantee_id       INTEGER,
+  warrantee_nm       VARCHAR2(300),
+  currency           VARCHAR2(30),
+  guar_amt           NUMBER(24,4),
+  guar_type_cd       VARCHAR2(30),
+  balance            INTEGER,
+  end_dt             DATE,
+  five_class_cd      VARCHAR2(30),
+  warrantee_currency VARCHAR2(30),
+  isdel              INTEGER not null,
+  src_company_cd     VARCHAR2(60),
+  src_cd             VARCHAR2(10) not null,
+  updt_by            NUMBER(16) not null,
+  updt_dt            TIMESTAMP(6) not null,
+  rnk                INTEGER
+)
+;
+
+--------------------------------------------
+--  New table temp_compy_warningtype_cmb  --
+--------------------------------------------
+-- Create table
+create global temporary table TEMP_COMPY_WARNINGTYPE_CMB
+(
+  data_dt         VARCHAR2(100),
+  warning_type_cd VARCHAR2(10),
+  warning_type    VARCHAR2(100),
+  warning_cd      VARCHAR2(100),
+  warning_nm      VARCHAR2(1000),
+  is_single       VARCHAR2(100),
+  is_emergent     VARCHAR2(100),
+  score1          VARCHAR2(100),
+  valid_flag1     VARCHAR2(100),
+  score2          VARCHAR2(100),
+  valid_flag2     VARCHAR2(100),
+  index_type_cd   VARCHAR2(100),
+  signal_type_cd  VARCHAR2(100),
+  record_sid      NUMBER(16),
+  loadlog_sid     INTEGER,
+  updt_dt         TIMESTAMP(6),
+  rnk             NUMBER
+)
+on commit delete rows;
+
+----------------------------------------
+--  New table temp_compy_warning_cmb  --
+----------------------------------------
+-- Create table
+create global temporary table TEMP_COMPY_WARNING_CMB
+(
+  data_dt          VARCHAR2(100),
+  warning_id       VARCHAR2(100),
+  warning_cd       VARCHAR2(100),
+  warn_title       VARCHAR2(1000),
+  warn_content     CLOB,
+  infosrc_dt       VARCHAR2(100),
+  warnsrc          VARCHAR2(100),
+  warn_outer_src   VARCHAR2(100),
+  attachment       VARCHAR2(4000),
+  status           VARCHAR2(30),
+  filter_status_cd VARCHAR2(30),
+  is_true          VARCHAR2(10),
+  cust_no          VARCHAR2(30),
+  company_id       NUMBER(16),
+  org_id           VARCHAR2(100),
+  org_nm           VARCHAR2(300),
+  lastmodify_dt    VARCHAR2(100),
+  record_sid       NUMBER(16),
+  loadlog_sid      INTEGER,
+  updt_dt          TIMESTAMP(6),
+  rnk              NUMBER
+)
+on commit delete rows;
+
+---------------------------------------------
+--  New table temp_compy_warnlevelchg_cmb  --
+---------------------------------------------
+-- Create table
+create global temporary table TEMP_COMPY_WARNLEVELCHG_CMB
+(
+  warnchg_id     INTEGER not null,
+  company_id     NUMBER(16) not null,
+  submit_dt      TIMESTAMP(6),
+  warn_level     VARCHAR2(30),
+  pre_warn_level VARCHAR2(30),
+  operate_module VARCHAR2(30),
+  operate_dt     TIMESTAMP(6),
+  isdel          INTEGER not null,
+  src_company_cd VARCHAR2(60),
+  src_cd         VARCHAR2(10) not null,
+  updt_by        NUMBER(16) not null,
+  updt_dt        TIMESTAMP(6) not null,
+  rnk            INTEGER,
+  record_sid     NUMBER(16),
+  loadlog_sid    INTEGER
+)
+on commit delete rows;
+-- Add comments to the table 
+comment on table TEMP_COMPY_WARNLEVELCHG_CMB
+  is 'TEMP-行内预警等级认定';
+-- Add comments to the columns 
+comment on column TEMP_COMPY_WARNLEVELCHG_CMB.warnchg_id
+  is '任务号';
+comment on column TEMP_COMPY_WARNLEVELCHG_CMB.company_id
+  is '企业标识符';
+comment on column TEMP_COMPY_WARNLEVELCHG_CMB.submit_dt
+  is '发起时间';
+comment on column TEMP_COMPY_WARNLEVELCHG_CMB.warn_level
+  is '调整后客户风险分层';
+comment on column TEMP_COMPY_WARNLEVELCHG_CMB.pre_warn_level
+  is '调整前客户风险分层';
+comment on column TEMP_COMPY_WARNLEVELCHG_CMB.operate_module
+  is '变动来源';
+comment on column TEMP_COMPY_WARNLEVELCHG_CMB.operate_dt
+  is '终批时间';
+comment on column TEMP_COMPY_WARNLEVELCHG_CMB.isdel
+  is '是否删除';
+comment on column TEMP_COMPY_WARNLEVELCHG_CMB.src_company_cd
+  is '源企业代码';
+comment on column TEMP_COMPY_WARNLEVELCHG_CMB.src_cd
+  is '源系统';
+comment on column TEMP_COMPY_WARNLEVELCHG_CMB.updt_by
+  is '更新人';
+comment on column TEMP_COMPY_WARNLEVELCHG_CMB.updt_dt
+  is '更新时间';
+comment on column TEMP_COMPY_WARNLEVELCHG_CMB.rnk
+  is '记录序列';
+comment on column TEMP_COMPY_WARNLEVELCHG_CMB.record_sid
+  is '流水号';
+comment on column TEMP_COMPY_WARNLEVELCHG_CMB.loadlog_sid
+  is '日志号';
+
+-----------------------------------------------
+--  New table temp_compy_warnlevelchg_cmb_t  --
+-----------------------------------------------
+-- Create table
+create table TEMP_COMPY_WARNLEVELCHG_CMB_T
+(
+  warnchg_id     INTEGER not null,
+  company_id     NUMBER(16) not null,
+  submit_dt      TIMESTAMP(6),
+  warn_level     VARCHAR2(30),
+  pre_warn_level VARCHAR2(30),
+  operate_module VARCHAR2(30),
+  operate_dt     TIMESTAMP(6),
+  isdel          INTEGER not null,
+  src_company_cd VARCHAR2(60),
+  src_cd         VARCHAR2(10) not null,
+  updt_by        NUMBER(16) not null,
+  updt_dt        TIMESTAMP(6) not null,
+  rnk            INTEGER,
+  record_sid     NUMBER(16),
+  loadlog_sid    INTEGER
+)
+;
+
+-----------------------------------
+--  New table temp_customer_cmb  --
+-----------------------------------
+-- Create table
+create global temporary table TEMP_CUSTOMER_CMB
+(
+  data_dt              VARCHAR2(100),
+  cust_no              VARCHAR2(30),
+  company_id           NUMBER(16),
+  customer_nm          VARCHAR2(300),
+  org_num              VARCHAR2(30),
+  risk_status_cd       VARCHAR2(100),
+  class_grade_cd       VARCHAR2(100),
+  is_yjhplatform       VARCHAR2(10),
+  is_loan              VARCHAR2(10),
+  is_cmbrelatecust     VARCHAR2(10),
+  customer_grade_cd    VARCHAR2(10),
+  is_high_risk         VARCHAR2(10),
+  group_cust_no        VARCHAR2(30),
+  group_nm             VARCHAR2(300),
+  group_warnstatus_cd  VARCHAR2(10),
+  is_guar              VARCHAR2(10),
+  guargrp_risklevel_cd VARCHAR2(100),
+  rating_cd            VARCHAR2(30),
+  bl_numb              VARCHAR2(30),
+  record_sid           NUMBER(16),
+  loadlog_sid          INTEGER,
+  updt_dt              TIMESTAMP(6),
+  rnk                  NUMBER
+)
+on commit delete rows;
+
+------------------------------------------------
+--  New table temp_warning_regulation_detail  --
+------------------------------------------------
+-- Create table
+create table TEMP_WARNING_REGULATION_DETAIL
+(
+  regulation_nm   VARCHAR2(100) not null,
+  regulation_type VARCHAR2(300) not null,
+  column_nm       VARCHAR2(2000),
+  warning_score   INTEGER,
+  l_score         NUMBER,
+  l_equal_score   NUMBER,
+  g_score         NUMBER,
+  g_equal_score   NUMBER,
+  flag            NUMBER
+)
+;
+
+----------------------
+--  New table test  --
+----------------------
+-- Create table
+create table TEST
+(
+  data_dt        VARCHAR2(100),
+  asset_type     VARCHAR2(100),
+  asset_name     VARCHAR2(100),
+  asset_describe VARCHAR2(100),
+  item_cost_no   VARCHAR2(100),
+  buy_date       VARCHAR2(100),
+  zj_start_dt    VARCHAR2(100),
+  nums           VARCHAR2(100),
+  unit           VARCHAR2(100),
+  unit_price     VARCHAR2(100),
+  gz_value       VARCHAR2(100),
+  residual_value VARCHAR2(100),
+  original_value VARCHAR2(100),
+  ues_year       VARCHAR2(100),
+  zj_amt_m       VARCHAR2(100),
+  zj_accum       VARCHAR2(100),
+  net_value      VARCHAR2(100),
+  used_m         VARCHAR2(100),
+  sy_useful_m    VARCHAR2(100),
+  ori_acc_org    VARCHAR2(100),
+  rz_subj_cd     VARCHAR2(100),
+  data_eff_dt    VARCHAR2(100),
+  data_invld_dt  VARCHAR2(100),
+  uuid           VARCHAR2(100),
+  sys_data_date  VARCHAR2(100),
+  sys_data_case  VARCHAR2(100),
+  sys_operator   VARCHAR2(100),
+  sys_oper_date  VARCHAR2(100),
+  sys_data_state VARCHAR2(100)
+)
+;
+
+------------------------------------------
+--  New table tmp_compy_rulefactor_cmb  --
+------------------------------------------
+-- Create table
+create table TMP_COMPY_RULEFACTOR_CMB
+(
+  company_id     NUMBER(16) not null,
+  factor_cd      VARCHAR2(100) not null,
+  factor_value   VARCHAR2(300),
+  isdel          INTEGER not null,
+  src_company_cd VARCHAR2(60),
+  src_cd         VARCHAR2(10) not null,
+  updt_by        NUMBER(16) not null,
+  updt_dt        TIMESTAMP(6) not null,
+  record_sid     NUMBER(16),
+  loadlog_sid    INTEGER,
+  rnk            NUMBER
+)
+;
+-- Add comments to the columns 
+comment on column TMP_COMPY_RULEFACTOR_CMB.company_id
+  is '企业标识符';
+comment on column TMP_COMPY_RULEFACTOR_CMB.factor_cd
+  is '指标代码';
+comment on column TMP_COMPY_RULEFACTOR_CMB.factor_value
+  is '指标值';
+comment on column TMP_COMPY_RULEFACTOR_CMB.isdel
+  is '是否删除';
+comment on column TMP_COMPY_RULEFACTOR_CMB.src_company_cd
+  is '源企业代码';
+comment on column TMP_COMPY_RULEFACTOR_CMB.src_cd
+  is '源系统';
+comment on column TMP_COMPY_RULEFACTOR_CMB.updt_by
+  is '更新人';
+comment on column TMP_COMPY_RULEFACTOR_CMB.updt_dt
+  is '更新时间';
+comment on column TMP_COMPY_RULEFACTOR_CMB.record_sid
+  is '流水号 ';
+comment on column TMP_COMPY_RULEFACTOR_CMB.loadlog_sid
+  is '日志号 ';
+comment on column TMP_COMPY_RULEFACTOR_CMB.rnk
+  is '排序编号';
+
+----------------------------------------
+--  Changed table tmp_compy_warnings  --
+----------------------------------------
+-- Drop columns 
+alter table TMP_COMPY_WARNINGS drop column company_id;
+alter table TMP_COMPY_WARNINGS drop column company_nm;
+alter table TMP_COMPY_WARNINGS drop column exposure_sid;
+alter table TMP_COMPY_WARNINGS drop column exposure;
+alter table TMP_COMPY_WARNINGS drop column region_cd;
+alter table TMP_COMPY_WARNINGS drop column region_nm;
+alter table TMP_COMPY_WARNINGS drop column rnk;
+alter table TMP_COMPY_WARNINGS add subject_id NUMBER(16) not null;
+alter table TMP_COMPY_WARNINGS add subject_type INTEGER;
+alter table TMP_COMPY_WARNINGS modify notice_dt not null;
+alter table TMP_COMPY_WARNINGS add warning_type INTEGER;
+alter table TMP_COMPY_WARNINGS modify severity INTEGER;
+alter table TMP_COMPY_WARNINGS add warning_score INTEGER;
+alter table TMP_COMPY_WARNINGS modify warning_title VARCHAR2(1000);
+alter table TMP_COMPY_WARNINGS modify type_id INTEGER;
+alter table TMP_COMPY_WARNINGS add status_flag INTEGER;
+alter table TMP_COMPY_WARNINGS add warning_result_cd INTEGER;
+alter table TMP_COMPY_WARNINGS add adjust_severity INTEGER;
+alter table TMP_COMPY_WARNINGS add adjust_score INTEGER;
+alter table TMP_COMPY_WARNINGS add remark VARCHAR2(2000);
+alter table TMP_COMPY_WARNINGS add process_by NUMBER(16);
+alter table TMP_COMPY_WARNINGS add process_dt TIMESTAMP(6);
+alter table TMP_COMPY_WARNINGS modify warning_content CLOB;
+alter table TMP_COMPY_WARNINGS add isdel INTEGER not null;
+alter table TMP_COMPY_WARNINGS add updt_by NUMBER(16) not null;
+alter table TMP_COMPY_WARNINGS add src_cd VARCHAR2(10) not null;
+alter table TMP_COMPY_WARNINGS add updt_dt TIMESTAMP(6) not null;
+-- Add comments to the columns 
+comment on column TMP_COMPY_WARNINGS.subject_id
+  is '预警对象代码';
+comment on column TMP_COMPY_WARNINGS.subject_type
+  is '预警对象类型';
+comment on column TMP_COMPY_WARNINGS.notice_dt
+  is '预警信号时间';
+comment on column TMP_COMPY_WARNINGS.warning_type
+  is '正负面';
+comment on column TMP_COMPY_WARNINGS.severity
+  is '严重程度';
+comment on column TMP_COMPY_WARNINGS.warning_score
+  is '信号分值';
+comment on column TMP_COMPY_WARNINGS.warning_title
+  is '预警标题';
+comment on column TMP_COMPY_WARNINGS.type_id
+  is '信号分类';
+comment on column TMP_COMPY_WARNINGS.status_flag
+  is '处理状态';
+comment on column TMP_COMPY_WARNINGS.warning_result_cd
+  is '处理类型';
+comment on column TMP_COMPY_WARNINGS.adjust_severity
+  is '调整后严重程度';
+comment on column TMP_COMPY_WARNINGS.adjust_score
+  is '调整后得分';
+comment on column TMP_COMPY_WARNINGS.remark
+  is '备注';
+comment on column TMP_COMPY_WARNINGS.process_by
+  is '处理人';
+comment on column TMP_COMPY_WARNINGS.process_dt
+  is '处理时间';
+comment on column TMP_COMPY_WARNINGS.warning_content
+  is '预警内容';
+comment on column TMP_COMPY_WARNINGS.isdel
+  is '是否删除';
+comment on column TMP_COMPY_WARNINGS.updt_by
+  is '更新人';
+comment on column TMP_COMPY_WARNINGS.src_cd
+  is '源系统';
+comment on column TMP_COMPY_WARNINGS.updt_dt
+  is '更新时间';
+------------------------------------------------
+--  New table warning_regulation_detail_1212  --
+------------------------------------------------
+-- Create table
+create table WARNING_REGULATION_DETAIL_1212
+(
+  warning_regulation_detail_sid NUMBER(16) not null,
+  warning_regulation_sid        NUMBER(16) not null,
+  bracket_1                     VARCHAR2(10),
+  column_nm                     VARCHAR2(2000) not null,
+  symbol                        VARCHAR2(10) not null,
+  value                         NUMBER(32,16) not null,
+  bracket_2                     VARCHAR2(10),
+  logic_symbol                  VARCHAR2(100),
+  factor_cd                     VARCHAR2(30),
+  cal_type                      INTEGER,
+  updt_by                       NUMBER(16) not null,
+  updt_dt                       TIMESTAMP(6) not null
+)
+;
+

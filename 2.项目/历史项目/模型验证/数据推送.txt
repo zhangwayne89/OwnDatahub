@@ -1,0 +1,26 @@
+select * from lkp_subscribe_table;--分发表
+select * from subscribe_table;
+select * from client_basicinfo;--客户ID
+select * from vw_subscribe_table where subscribe_id = 5 and isdel = 0;--招商要分发的表
+select * from environment;--每个环境的日志表
+select * from etl_exp_loadlog where subscribe_id = 5;--生产环境推送的日志
+select * from etl_exp_loadlog_uat where subscribe_id = 5;--UAT环境推送的日志
+(根据日志记录来进行增量推送，删除subscribe_id=5的记录后可以全量推送)
+
+
+
+登录用户：
+chinacscs/Cscs@31$2017#
+root/Chinacscs@2017#
+
+端口：10010
+
+10.100.24.11
+
+MDS PROD -->招商UAT环境
+
+/usr/local/MasterDataExport-1.0-SNAPSHOT/bin/MasterDataExport.sh -s 5 -e uat
+
+MDS PROD -->招商TEST环境
+
+/usr/local/MasterDataExport-1.0-SNAPSHOT/bin/MasterDataExport.sh -s 5 -e test
