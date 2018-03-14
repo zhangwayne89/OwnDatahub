@@ -1,0 +1,50 @@
+CREATE TABLE zhc_rid AS
+SELECT rating_record_id,a.updt_dt
+  FROM rating_record a
+ WHERE a.exposure_sid NOT IN ('6354', '6355', '6360', '60001');--保留敞口
+
+CREATE TABLE zhc_tmp AS
+SELECT bond_rating_record_sid,x.rating_record_id,x.updt_dt
+  FROM bond_rating_xw x
+ WHERE x.updt_dt <= to_date('20180201 19:00:00','yyyymmdd hh24:mi:ss')
+   AND NOT EXISTS (SELECT 1
+          FROM (SELECT rating_record_id
+                  FROM rating_record a
+                 WHERE a.exposure_sid IN
+                       ('6354', '6355', '6360', '60001')) ok_sid  --保留敞口
+         WHERE x.rating_record_id = ok_sid.rating_record_id);
+
+DELETE FROM bond_rating_record
+ WHERE bond_rating_record_sid IN
+       (SELECT zc.bond_rating_record_sid FROM zhc_tmp zc);
+DELETE FROM bond_rating_detail
+ WHERE bond_rating_record_sid IN
+       (SELECT zc.bond_rating_record_sid FROM zhc_tmp zc);
+DELETE FROM bond_rating_factor
+ WHERE bond_rating_record_sid IN
+       (SELECT zc.bond_rating_record_sid FROM zhc_tmp zc);
+DELETE FROM bond_rating_xw
+ WHERE bond_rating_record_sid IN
+       (SELECT zc.bond_rating_record_sid FROM zhc_tmp zc);
+DELETE FROM bond_rating_approv
+ WHERE bond_rating_record_sid IN
+       (SELECT zc.bond_rating_record_sid FROM zhc_tmp zc);
+DELETE FROM bond_rating_display
+ WHERE bond_rating_record_id  IN
+       (SELECT zc.bond_rating_record_sid FROM zhc_tmp zc);
+       
+
+DELETE FROM rating_detail
+ WHERE rating_record_id IN (SELECT rating_record_id FROM zhc_rid);
+DELETE FROM rating_display
+ WHERE rating_record_id IN (SELECT rating_record_id FROM zhc_rid);
+DELETE FROM rating_factor
+ WHERE rating_record_id IN (SELECT rating_record_id FROM zhc_rid);
+DELETE FROM rating_approv
+ WHERE rating_record_id IN (SELECT rating_record_id FROM zhc_rid);
+DELETE FROM rating_adjustment_reason
+ WHERE rating_record_id IN (SELECT rating_record_id FROM zhc_rid);
+DELETE FROM rating_record_log
+ WHERE rating_record_id IN (SELECT rating_record_id FROM zhc_rid);
+DELETE FROM rating_record
+ WHERE rating_record_id IN (SELECT rating_record_id FROM zhc_rid);
